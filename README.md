@@ -1,3 +1,25 @@
+This branch adds MySQL support to K6. You can use it like so:
+```
+// Connection
+let res = mysql.connect("localhost", "username", "password", "database name")
+if(res.error){
+    console.error("MySQL connection error")
+    return false
+}
+
+const database = res.db
+
+// Query
+let err, res = database.query(database.ctx, "SELECT * FROM users")
+if(err){
+    return console.error("MySQL: " + err)
+}
+
+console.log(res)
+```
+
+---
+
 <p align="center"><a href="https://k6.io/"><img src="logo.png" alt="k6" width="300" height="282"></a></p>
 
 <h3 align="center">Like unit testing, for performance</h3>
