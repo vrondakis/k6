@@ -27,13 +27,16 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
+	"crypto/rsa"
+	"crypto/rand"
+	"crypto"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"hash"
-
 	"golang.org/x/crypto/md4"
 	"golang.org/x/crypto/ripemd160"
+	"github.com/youmark/pkcs8"
 
 	"github.com/loadimpact/k6/js/common"
 )
@@ -102,6 +105,15 @@ func (c *Crypto) Ripemd160(ctx context.Context, input []byte, outputEncoding str
 	hasher := c.CreateHash(ctx, "ripemd160")
 	hasher.Update(input)
 	return hasher.Digest(outputEncoding)
+}
+
+func (*Crypto) ParsePKCS8(ctx context.Context, base64Key string, data string) string{
+	decodedKey, _ := base64.StdEncoding.DecodeString(base64Key)
+	key, _ := pkcs8.ParsePKCS8PrivateKeyRSA([]byte(decodedKey))
+	hashed := sha256.Sum256([]byte(data))
+	signed, _ := rsa.SignPKCS1v15(rand.Reader, key, crypto.SHA256, hashed[:])
+
+	return base64.StdEncoding.EncodeToString(signed)	
 }
 
 func (*Crypto) CreateHash(ctx context.Context, algorithm string) *Hasher {
